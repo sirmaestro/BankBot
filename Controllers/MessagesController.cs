@@ -59,11 +59,11 @@ namespace botapplication
 
                     var signinCard = new SigninCard()
                     {
-                        Text = "Authorisation needed",
+                        Text = "Sign in to Facebook here!",
                         Buttons = new List<CardAction> {
                             new CardAction()
                             {
-                                Value = "https://www.facebook.com/v2.8/dialog/oauth?client_id=655730517931284&redirect_uri=https://www.facebook.com/connect/login_success.html",
+                                Value = "https://www.facebook.com/v2.8/dialog/oauth?client_id=655730517931284&display=popup&response_type=token&redirect_uri=https://www.facebook.com/connect/login_success.html",
                                 Type = "signin",
                                 Title = "Facebook OAuth",
                                 Image = "https://cdn1.iconfinder.com/data/icons/logotypes/32/square-facebook-128.png"
