@@ -50,7 +50,7 @@ namespace botapplication
 
                 if (userMessage.ToLower().Contains("help"))
                 {
-                    reply = "'signin' to sign into facebook or google";
+                    reply = "You can type 'signin' to sign into facebook";
                 }
 
                 if (userMessage.ToLower().Contains("signin"))
@@ -63,18 +63,11 @@ namespace botapplication
                         Buttons = new List<CardAction> {
                             new CardAction()
                             {
-                                Value = "https://robinosborne.co.uk/?s=bot",
+                                Value = "https://www.facebook.com/v2.8/dialog/oauth?client_id=655730517931284&redirect_uri=https://www.facebook.com/connect/login_success.html",
                                 Type = "signin",
                                 Title = "Facebook OAuth",
                                 Image = "https://cdn1.iconfinder.com/data/icons/logotypes/32/square-facebook-128.png"
                             },
-                            new CardAction()
-                            {
-                                Value = "https://robinosborne.co.uk/?s=bot",
-                                Type = "signin",
-                                Title = "Google",
-                                Image = "http://images.dailytech.com/nimage/G_is_For_Google_New_Logo_Thumb.png"
-                            }
                         }
                     };
 
