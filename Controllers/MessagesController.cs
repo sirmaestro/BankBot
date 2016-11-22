@@ -36,11 +36,11 @@ namespace botapplication
 
                 //Activity endReply = activity.CreateReply($"Hello there, my name is BankBot");
 
-                string reply = "Hello there, my name is BankBot. Type 'help' to see what I can do!";
+                string reply = "Hello " + activity.From.Name + ", my name is BankBot. Type 'help' to see what I can do!";
 
                 if (userData.GetProperty<bool>("SentGreeting"))
                 {
-                    reply = "Hello again";
+                    reply = "Hello again" + activity.From.Name;
                 }
                 else
                 {
@@ -55,7 +55,7 @@ namespace botapplication
 
                 if (userMessage.ToLower().Contains("signin"))
                 {
-                    Activity card1 = activity.CreateReply("Here's a **signin**");
+                    Activity card1 = activity.CreateReply("");
 
                     var signinCard = new SigninCard()
                     {
