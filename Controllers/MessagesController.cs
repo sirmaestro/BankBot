@@ -51,7 +51,7 @@ namespace botapplication
 
                 //Activity endReply = activity.CreateReply($"Hello there, my name is BankBot");
 
-                string reply = "Hello " + userFirstName + ", my name is BankBot. \nType 'help' to see what I can do!";
+                string reply = "Hello " + userFirstName + ", my name is BankBot. \n\nType 'help' to see what I can do!";
 
                 //if (userData.GetProperty<bool>("SentGreeting"))
                 //{
@@ -65,7 +65,7 @@ namespace botapplication
 
                 if (userMessage.ToLower().Contains("help"))
                 {
-                    reply = "You can type :\n'Signin' to sign into facebook \n'Account' to check your account information \n'Set currency as EXAMPLE' to set a default currency and I will remember you";
+                    reply = "You can type :\n\n'Signin' to sign into facebook \n\n'Account' to check your account information \n\n'Set currency as EXAMPLE' to set a default currency and I will remember you";
                 }
 
                 if (userMessage.ToLower().Contains("signin"))
