@@ -99,35 +99,39 @@ namespace botapplication
 
                 //}
 
-                if (userMessage.Length == 19)
+                //if (userMessage.Length == 19)
+                //{
+                //    if (userMessage.ToLower().Contains("set currency as"))
+                //    {
+                //        string userCurrency = userMessage.ToUpper().Substring(16);
+                //        userData.SetProperty<string>("UserCurrency", userCurrency);
+                //        await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                //        reply = "Currency set as " + userCurrency;
+
+                //        Test userDataSend = new Test()
+                //        {
+                //            firstName = userFirstName,
+                //            lastName = userLastName,
+                //            currency = userCurrency,
+                //            Date = DateTime.Now
+                //        };
+                //        await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
+                //    }
+                //}
+                if (userMessage.Equals("test"))
                 {
-                    if (userMessage.ToLower().Contains("set currency as"))
+                    Timeline userDataSend = new Timeline()
                     {
-                        string userCurrency = userMessage.ToUpper().Substring(16);
-                        userData.SetProperty<string>("UserCurrency", userCurrency);
-                        await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
-                        reply = "Currency set as " + userCurrency;
-
-                        Test userDataSend = new Test()
-                        {
-                            firstName = userFirstName,
-                            lastName = userLastName,
-                            currency = userCurrency,
-                            Date = DateTime.Now
-                        };
-                        await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
-                    }
+                        firstName = "bob",
+                        lastName = "smith",
+                        currency = "USD",
+                        Date = DateTime.Now
+                    };
+                    await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
                 }
 
-                if (userMessage.ToLower().Contains("signup"))
-                {
-                    
-                }
-                else
-                {
-                    Activity endReply = activity.CreateReply(reply);
-                    await connector.Conversations.ReplyToActivityAsync(endReply);
-                }
+                Activity endReply = activity.CreateReply(reply);
+                await connector.Conversations.ReplyToActivityAsync(endReply);
                 //
                 //Test emo = new Test()
                 //{

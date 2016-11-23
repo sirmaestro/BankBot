@@ -139,6 +139,7 @@
     <Compile Include="BankForm.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="DataModel\Test.cs" />
+    <Compile Include="DataModel\Timeline.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
