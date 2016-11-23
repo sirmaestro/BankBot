@@ -1,6 +1,8 @@
 ﻿using Autofac;
+using botapplication.DataModel;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Internals;
+using Microsoft.Bot.Builder.FormFlow;
 using Microsoft.Bot.Connector;
 using Newtonsoft.Json;
 using System;
@@ -16,6 +18,13 @@ namespace botapplication
     [BotAuthentication]
     public class MessagesController : ApiController
     {
+        internal static IDialog<BankForm> MakeRootDialog()
+        {
+            return Chain.From(() => FormDialog.FromForm(BankForm.BuildForm));
+        }
+        //bool enteringFormData = false;
+        //private int numberOfFieldsEntered = 0;
+
         /// <summary>
         /// POST: api/Messages
         /// Receive a message from a user and reply to it
@@ -26,8 +35,14 @@ namespace botapplication
             {
                 ConnectorClient connector = new ConnectorClient(new Uri(activity.ServiceUrl));
                 var userMessage = activity.Text;
-
-
+                var names = activity.From.Name.Split(' ');
+                string userFirstName = names[0];
+                string userLastName = "";
+                if (names.Length > 1)
+                {
+                    userLastName = names[names.Length - 1];
+                }
+                
                 StateClient stateClient = activity.GetStateClient();
                 BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
 
@@ -36,21 +51,21 @@ namespace botapplication
 
                 //Activity endReply = activity.CreateReply($"Hello there, my name is BankBot");
 
-                string reply = "Hello " + activity.From.Name + ", my name is BankBot. Type 'help' to see what I can do!";
+                string reply = "Hello " + userFirstName + ", my name is BankBot. \nType 'help' to see what I can do!";
 
-                if (userData.GetProperty<bool>("SentGreeting"))
-                {
-                    reply = "Hello again" + activity.From.Name;
-                }
-                else
-                {
-                    userData.SetProperty<bool>("SentGreeting", true);
-                    await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
-                }
+                //if (userData.GetProperty<bool>("SentGreeting"))
+                //{
+                //    reply = "Hello again, " + activity.From.Name + "! \nThanks for visting us again!";
+                //}
+                //else
+                //{
+                //    userData.SetProperty<bool>("SentGreeting", true);
+                //    await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                //}
 
                 if (userMessage.ToLower().Contains("help"))
                 {
-                    reply = "You can type 'signin' to sign into facebook";
+                    reply = "You can type :\n'Signin' to sign into facebook \n'Account' to check your account information \n'Set currency as EXAMPLE' to set a default currency and I will remember you";
                 }
 
                 if (userMessage.ToLower().Contains("signin"))
@@ -77,9 +92,42 @@ namespace botapplication
 
                     await connector.Conversations.SendToConversationAsync(card1);
                     return Request.CreateResponse(HttpStatusCode.OK);
-
                 }
 
+                //if (userMessage.ToLower().Contains("account"))
+                //{
+
+                //}
+
+                if (userMessage.Length == 19)
+                {
+                    if (userMessage.ToLower().Contains("set currency as"))
+                    {
+                        string userCurrency = userMessage.ToUpper().Substring(16);
+                        userData.SetProperty<string>("UserCurrency", userCurrency);
+                        await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                        reply = "Currency set as " + userCurrency;
+
+                        Test userDataSend = new Test()
+                        {
+                            firstName = userFirstName,
+                            lastName = userLastName,
+                            currency = userCurrency,
+                            Date = DateTime.Now
+                        };
+                        await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
+                    }
+                }
+
+                if (userMessage.ToLower().Contains("signup"))
+                {
+                    
+                }
+                else
+                {
+                    Activity endReply = activity.CreateReply(reply);
+                    await connector.Conversations.ReplyToActivityAsync(endReply);
+                }
                 //
                 //Test emo = new Test()
                 //{
@@ -96,8 +144,6 @@ namespace botapplication
 
                 //await AzureManager.AzureManagerInstance.AddTimeline(emo);
                 //
-                Activity endReply = activity.CreateReply(reply);
-                await connector.Conversations.ReplyToActivityAsync(endReply);
             }
 
             else if (activity.Type == ActivityTypes.ConversationUpdate)
@@ -132,7 +178,7 @@ namespace botapplication
             return response;
         }
 
-        private Activity HandleSystemMessage(Activity message)
+        private async Task<Activity> HandleSystemMessage(Activity message)
         {
             if (message.Type == ActivityTypes.DeleteUserData)
             {

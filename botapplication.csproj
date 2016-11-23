@@ -136,6 +136,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="AzureManager.cs" />
+    <Compile Include="BankForm.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="DataModel\Test.cs" />
     <Compile Include="Global.asax.cs">
