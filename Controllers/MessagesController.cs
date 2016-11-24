@@ -101,6 +101,7 @@ namespace botapplication
                 if (userMessage.ToLower().Equals("delete"))
                 {
                     List<Timeline> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                    reply = "Sorry, I don't think I have your information";
                     foreach (Timeline t in timelines)
                     {
                         if ((t.firstName == userFirstName) && (t.lastName == userLastName))
@@ -114,6 +115,7 @@ namespace botapplication
                 if (userMessage.ToLower().Contains("account"))
                 {
                     List<Timeline> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                    reply = "Sorry, I don't think I have your information";
                     foreach (Timeline t in timelines)
                     {
                         if ((t.firstName == userFirstName) && (t.lastName == userLastName))
