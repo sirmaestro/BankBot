@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using botapplication.DataModel;
+using botapplication.Model;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Dialogs.Internals;
 using Microsoft.Bot.Builder.FormFlow;
@@ -12,6 +13,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using static botapplication.Model.RateObject;
 
 namespace botapplication
 {
@@ -42,7 +44,9 @@ namespace botapplication
                 {
                     userLastName = names[names.Length - 1];
                 }
-                
+                string[] supportedCurrency = new string[] { "AUD", "BGN", "BRL", "CAD", "CHF", "CNY", "CZK", "DKK", "GBP", "HKD", "HRK", "HUF", "IDR", "ILS", "INR", "JPY", "KRW", "MXN", "MYR", "NOK", "NZD", "PHP", "PLN", "RON", "RUB", "SEK", "SGD", "THB", "TRY", "USD", "ZAR" };
+
+
                 StateClient stateClient = activity.GetStateClient();
                 BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
 
@@ -65,7 +69,7 @@ namespace botapplication
 
                 if (userMessage.ToLower().Contains("help"))
                 {
-                    reply = "You can type :\n\n'Signin' to sign into facebook \n\n'Account' to check your account information \n\n'Set currency as EXAMPLE' to set a default currency and I will remember you";
+                    reply = "You can type :\n\n'Signin' to sign into facebook \n\n'Account' to check your account information \n\n'Rate of EXAMPLE' to check the current rates \n\n'Set currency as EXAMPLE' to set a default currency and I will remember you";
                 }
 
                 if (userMessage.ToLower().Contains("signin"))
@@ -121,39 +125,192 @@ namespace botapplication
 
                 if (userMessage.Length == 19)
                 {
-                    if (userMessage.ToLower().Substring(0, 15).Equals("set currency as"))
+                    if (userMessage.ToLower().Substring(0, 7).Equals("set currency as"))
                     {
                         string userCurrency = userMessage.ToUpper().Substring(16);
-                        userData.SetProperty<string>("UserCurrency", userCurrency);
-                        await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
-                        reply = "Currency set as " + userCurrency;
-                        bool noupdateuser = true;
+                        reply = "Sorry, the currency you entered is not supported";
+                        foreach (string x in supportedCurrency)
+                        {
+                            if (userCurrency.Equals(x))
+                            {
+                                userData.SetProperty<string>("UserCurrency", userCurrency);
+                                await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                                reply = "Currency set as " + userCurrency;
+                                bool noupdateuser = true;
+                                List<Timeline> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                                foreach (Timeline t in timelines)
+                                {
+                                    if ((t.firstName == userFirstName) && (t.lastName == userLastName))
+                                    {
+                                        t.currency = userCurrency;
+                                        reply = "Your account information has been updated:\n\n First Name: " + t.firstName + "\n\nLast Name: " + t.lastName + "\n\nCurrency: " + t.currency;
+                                        noupdateuser = false;
+                                        await AzureManager.AzureManagerInstance.UpdateTimeline(t);
+                                    }
+                                }
+
+                                if (noupdateuser)
+                                {
+                                    Timeline userDataSend = new Timeline()
+                                    {
+                                        firstName = userFirstName,
+                                        lastName = userLastName,
+                                        currency = userCurrency,
+                                        Date = DateTime.Now
+                                    };
+                                    await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (userMessage.Length == 11)
+                {
+                    if (userMessage.ToLower().Substring(0, 7).Equals("rate of"))
+                    {
+                        string userCurrency = userMessage.ToUpper().Substring(8);
                         List<Timeline> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                        reply = "Sorry, I don't think I have your information";
                         foreach (Timeline t in timelines)
                         {
                             if ((t.firstName == userFirstName) && (t.lastName == userLastName))
                             {
-                                t.currency = userCurrency;
-                                reply = "Your account information has been updated:\n\n First Name: " + t.firstName + "\n\nLast Name: " + t.lastName + "\n\nCurrency: " + t.currency;
-                                noupdateuser = false;
-                                await AzureManager.AzureManagerInstance.UpdateTimeline(t);
+                                double r = 0;
+                                RateObject.RootObject rateobject;
+                                HttpClient client = new HttpClient();
+                                string x = await client.GetStringAsync(new Uri("https://api.fixer.io/latest?base=" + t.currency));
+                                rateobject = JsonConvert.DeserializeObject<RateObject.RootObject>(x);
+                                switch (userCurrency)
+                                {
+                                    case "AUD":
+                                        r = rateobject.rates.AUD;
+                                        break;
+                                    case "BGN":
+                                        r = rateobject.rates.BGN;
+                                        break;
+                                    case "BRL":
+                                        r = rateobject.rates.BRL;
+                                        break;
+                                    case "CAD":
+                                        r = rateobject.rates.CAD;
+                                        break;
+                                    case "CHF":
+                                        r = rateobject.rates.CHF;
+                                        break;
+                                    case "CNY":
+                                        r = rateobject.rates.CNY;
+                                        break;
+                                    case "CZK":
+                                        r = rateobject.rates.CZK;
+                                        break;
+                                    case "DKK":
+                                        r = rateobject.rates.DKK;
+                                        break;
+                                    case "GBP":
+                                        r = rateobject.rates.GBP;
+                                        break;
+                                    case "HKD":
+                                        r = rateobject.rates.HKD;
+                                        break;
+                                    case "HRK":
+                                        r = rateobject.rates.HRK;
+                                        break;
+                                    case "HUF":
+                                        r = rateobject.rates.HUF;
+                                        break;
+                                    case "IDR":
+                                        r = rateobject.rates.IDR;
+                                        break;
+                                    case "ILS":
+                                        r = rateobject.rates.ILS;
+                                        break;
+                                    case "INR":
+                                        r = rateobject.rates.INR;
+                                        break;
+                                    case "JPY":
+                                        r = rateobject.rates.JPY;
+                                        break;
+                                    case "KRW":
+                                        r = rateobject.rates.KRW;
+                                        break;
+                                    case "MXN":
+                                        r = rateobject.rates.MXN;
+                                        break;
+                                    case "MYR":
+                                        r = rateobject.rates.MYR;
+                                        break;
+                                    case "NOK":
+                                        r = rateobject.rates.NOK;
+                                        break;
+                                    case "NZD":
+                                        r = rateobject.rates.NZD;
+                                        break;
+                                    case "PHP":
+                                        r = rateobject.rates.PHP;
+                                        break;
+                                    case "PLN":
+                                        r = rateobject.rates.PLN;
+                                        break;
+                                    case "RON":
+                                        r = rateobject.rates.RON;
+                                        break;
+                                    case "RUB":
+                                        r = rateobject.rates.RUB;
+                                        break;
+                                    case "SEK":
+                                        r = rateobject.rates.SEK;
+                                        break;
+                                    case "SGD":
+                                        r = rateobject.rates.SGD;
+                                        break;
+                                    case "THB":
+                                        r = rateobject.rates.THB;
+                                        break;
+                                    case "TRY":
+                                        r = rateobject.rates.TRY;
+                                        break;
+                                    case "USD":
+                                        r = rateobject.rates.USD;
+                                        break;
+                                    case "ZAR":
+                                        r = rateobject.rates.ZAR;
+                                        break;
+                                    default:
+                                        reply = "Sorry, I can't find your currency";
+                                        break;
+                                }
+                                reply = t.currency + " to " + userCurrency + " is " + r;
+                                if (userCurrency.Equals(t.currency))
+                                {
+                                    reply = t.currency + " to " + userCurrency + " is 1";
+                                }
                             }
                         }
-
-                        if (noupdateuser)
-                        {
-                            Timeline userDataSend = new Timeline()
-                            {
-                                firstName = userFirstName,
-                                lastName = userLastName,
-                                currency = userCurrency,
-                                Date = DateTime.Now
-                            };
-                            await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
-                        }
-
+                        
                     }
                 }
+                //if (userMessage.ToLower().Equals("currency rate"))
+                //{
+                //    List<Timeline> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                //    foreach (Timeline t in timelines)
+                //    {
+                //        reply = "Sorry, I don't think I have your information";
+                //        if ((t.firstName == userFirstName) && (t.lastName == userLastName))
+                //        {
+                //            reply = t.currency + " rate is: \n\n";
+                //            RateObject.RootObject rateobject;
+                //            HttpClient client = new HttpClient();
+                //            string x = await client.GetStringAsync(new Uri("https://api.fixer.io/latest?base=" + t.currency));
+                //            rateobject = JsonConvert.DeserializeObject<RateObject.RootObject>(x);
+                //            foreach (var entry in rateobject.rates)
+                //            {
+                //                reply += entry.Value + " in " + entry.Key + "\n\n";
+                //            }
+                //        }
+                //    }
+
+                //}
+
                 //if (userMessage.Equals("test"))
                 //{
                 //    Test userDataSend = new Test()
@@ -183,22 +340,7 @@ namespace botapplication
 
                 Activity endReply = activity.CreateReply(reply);
                 await connector.Conversations.ReplyToActivityAsync(endReply);
-                //
-                //Test emo = new Test()
-                //{
-                //    Anger = temp.Anger,
-                //    Contempt = temp.Contempt,
-                //    Disgust = temp.Disgust,
-                //    Fear = temp.Fear,
-                //    Happiness = temp.Happiness,
-                //    Neutral = temp.Neutral,
-                //    Sadness = temp.Sadness,
-                //    Surprise = temp.Surprise,
-                //    Date = DateTime.Now
-                //};
 
-                //await AzureManager.AzureManagerInstance.AddTimeline(emo);
-                //
             }
 
             else if (activity.Type == ActivityTypes.ConversationUpdate)
