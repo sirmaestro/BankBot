@@ -69,7 +69,7 @@ namespace botapplication
 
                 if (userMessage.ToLower().Contains("help"))
                 {
-                    reply = "You can type :\n\n'Signin' to sign into facebook \n\n'Account' to check your account information \n\n'Rate of EXAMPLE' to check the current rates \n\n'Set currency as EXAMPLE' to set a default currency and I will remember you";
+                    reply = "You can type :\n\n'Signin' to sign into facebook \n\n'Account' to check your account information \n\n'Rate of EXAMPLE' to check the current rates \n\n'Set currency as EXAMPLE' to set a default currency and I will remember you \n\n'Delete' to delete your information";
                 }
 
                 if (userMessage.ToLower().Contains("signin"))
@@ -118,7 +118,7 @@ namespace botapplication
                     {
                         if ((t.firstName == userFirstName) && (t.lastName == userLastName))
                         {
-                            reply = "Your account information:\n\n First Name: " + t.firstName + "\n\nLast Name: " + t.lastName + "\n\nCurrency: " + t.currency;
+                            reply = "Your account information:\n\nFirst Name: " + t.firstName + "\n\nLast Name: " + t.lastName + "\n\nCurrency: " + t.currency;
                         }
                     }
                 }
@@ -283,6 +283,10 @@ namespace botapplication
                                 if (userCurrency.Equals(t.currency))
                                 {
                                     reply = t.currency + " to " + userCurrency + " is 1";
+                                }
+                                else if (r == 0)
+                                {
+                                    reply = "Sorry, I can't find your currency";
                                 }
                             }
                         }
