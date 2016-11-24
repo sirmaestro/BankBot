@@ -125,7 +125,7 @@ namespace botapplication
 
                 if (userMessage.Length == 19)
                 {
-                    if (userMessage.ToLower().Substring(0, 7).Equals("set currency as"))
+                    if (userMessage.ToLower().Substring(0, 15).Equals("set currency as"))
                     {
                         string userCurrency = userMessage.ToUpper().Substring(16);
                         reply = "Sorry, the currency you entered is not supported";
