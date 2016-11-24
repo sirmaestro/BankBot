@@ -96,10 +96,17 @@ namespace botapplication
         {
             await this.timelineTable.InsertAsync(timeline);
         }
-
         public async Task<List<Timeline>> GetTimelines()
         {
             return await this.timelineTable.ToListAsync();
+        }
+        public async Task DeleteTimeline(Timeline timeline)
+        {
+            await this.timelineTable.DeleteAsync(timeline);
+        }
+        public async Task UpdateTimeline(Timeline timeline)
+        {
+            await this.timelineTable.UpdateAsync(timeline);
         }
     }
 }

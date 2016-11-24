@@ -94,41 +94,92 @@ namespace botapplication
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
 
-                //if (userMessage.ToLower().Contains("account"))
-                //{
-
-                //}
-
-                //if (userMessage.Length == 19)
-                //{
-                //    if (userMessage.ToLower().Contains("set currency as"))
-                //    {
-                //        string userCurrency = userMessage.ToUpper().Substring(16);
-                //        userData.SetProperty<string>("UserCurrency", userCurrency);
-                //        await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
-                //        reply = "Currency set as " + userCurrency;
-
-                //        Test userDataSend = new Test()
-                //        {
-                //            firstName = userFirstName,
-                //            lastName = userLastName,
-                //            currency = userCurrency,
-                //            Date = DateTime.Now
-                //        };
-                //        await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
-                //    }
-                //}
-                if (userMessage.Equals("test"))
+                if (userMessage.ToLower().Equals("delete"))
                 {
-                    Timeline userDataSend = new Timeline()
+                    List<Timeline> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                    foreach (Timeline t in timelines)
                     {
-                        firstName = "bob",
-                        lastName = "smith",
-                        currency = "USD",
-                        Date = DateTime.Now
-                    };
-                    await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
+                        if ((t.firstName == userFirstName) && (t.lastName == userLastName))
+                        {
+                            reply = "Your account information has been deleted:\n\n First Name: " + t.firstName + "\n\nLast Name: " + t.lastName + "\n\nCurrency: " + t.currency;
+                            await AzureManager.AzureManagerInstance.DeleteTimeline(t);
+                        }
+                    }
                 }
+
+                if (userMessage.ToLower().Contains("account"))
+                {
+                    List<Timeline> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                    foreach (Timeline t in timelines)
+                    {
+                        if ((t.firstName == userFirstName) && (t.lastName == userLastName))
+                        {
+                            reply = "Your account information:\n\n First Name: " + t.firstName + "\n\nLast Name: " + t.lastName + "\n\nCurrency: " + t.currency;
+                        }
+                    }
+                }
+
+                if (userMessage.Length == 19)
+                {
+                    if (userMessage.ToLower().Substring(0, 15).Equals("set currency as"))
+                    {
+                        string userCurrency = userMessage.ToUpper().Substring(16);
+                        userData.SetProperty<string>("UserCurrency", userCurrency);
+                        await stateClient.BotState.SetUserDataAsync(activity.ChannelId, activity.From.Id, userData);
+                        reply = "Currency set as " + userCurrency;
+                        bool noupdateuser = true;
+                        List<Timeline> timelines = await AzureManager.AzureManagerInstance.GetTimelines();
+                        foreach (Timeline t in timelines)
+                        {
+                            if ((t.firstName == userFirstName) && (t.lastName == userLastName))
+                            {
+                                t.currency = userCurrency;
+                                reply = "Your account information has been updated:\n\n First Name: " + t.firstName + "\n\nLast Name: " + t.lastName + "\n\nCurrency: " + t.currency;
+                                noupdateuser = false;
+                                await AzureManager.AzureManagerInstance.UpdateTimeline(t);
+                            }
+                        }
+
+                        if (noupdateuser)
+                        {
+                            Timeline userDataSend = new Timeline()
+                            {
+                                firstName = userFirstName,
+                                lastName = userLastName,
+                                currency = userCurrency,
+                                Date = DateTime.Now
+                            };
+                            await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
+                        }
+
+                    }
+                }
+                //if (userMessage.Equals("test"))
+                //{
+                //    Test userDataSend = new Test()
+                //    {
+                //        firstName = "bob",
+                //        lastName = "smith",
+                //        currency = "USD",
+                //        Date = DateTime.Now
+                //    };
+                //    await AzureManager.AzureManagerInstance.AddTimeline(userDataSend);
+                //}
+
+                //if (userMessage.ToLower().Equals("new timeline"))
+                //{
+                //    Timeline timeline = new Timeline()
+                //    {
+                //        firstName = "bob",
+                //        lastName = "smith",
+                //        currency = "USD",
+                //        Date = DateTime.Now
+                //    };
+
+                //    await AzureManager.AzureManagerInstance.AddTimeline(timeline);
+
+                //    reply = "New timeline added [" + timeline.Date + "]";
+                //}
 
                 Activity endReply = activity.CreateReply(reply);
                 await connector.Conversations.ReplyToActivityAsync(endReply);
